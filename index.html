@@ -275,6 +275,10 @@
   function $(id){ return document.getElementById(id); }
   function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
   // Apps Script の中で開いたときは google.script.run、外部のページ（GitHub Pages 等）では API を使います
+  // 予約経路：予約ページのURLの最後 ?from=insta などを読み取る
+  var FROM = '';
+  try { FROM = new URLSearchParams(location.search).get('from') || ''; } catch(e) {}
+  try { if (!FROM && window.google && google.script && google.script.url) google.script.url.getLocation(function(l){ FROM = (l.parameter && l.parameter.from) || ''; }); } catch(e) {}
   var API_URL = 'https://script.google.com/macros/s/AKfycbzI0NC99pd3ZT8XmDyv6FitFONAWNtpKPmBETT9_2codgoWO_ppvgyQIU__zv4HR2yb/exec';
   function call(fn){
     var args = Array.prototype.slice.call(arguments,1);
@@ -462,7 +466,7 @@
     if(sending) return; sending=true; $('submit').disabled=true;
     loading(true,'予約を送信しています…');
     call('createReservation',{date:S.date,slotId:S.slotId,people:S.people,adults:S.adults,children:S.children,seatType:S.seatType,course:S.course,courseId:S.courseId,
-      name:$('name').value.trim(),tel:$('tel').value,note:$('note').value.trim(),referral:S.referral})
+      name:$('name').value.trim(),tel:$('tel').value,note:$('note').value.trim(),referral:S.referral,from:FROM})
     .then(function(r){
       if(!r.ok){
         $('err4').textContent=r.message; $('err4').classList.remove('hide');
